@@ -1,5 +1,7 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system/legacy';
 import { DiseaseDetection } from '../types';
 
 const BACKEND_URL_KEY = '@agrisense_backend_url';
@@ -172,13 +174,38 @@ const calculateSeverity = (diseaseName: string, confidence: number): 'Mild' | 'M
  * Predict plant disease by uploading leaf image to the FastAPI backend
  */
 /**
- * Convert a URI (remote URL, file://, or content://) to a Base64 string
+ * Convert a URI (remote URL, file://, or content://) to a Base64 string safely
  */
 export const uriToBase64 = async (uri: string): Promise<string> => {
   if (uri.startsWith('data:')) {
     const parts = uri.split(',');
     return parts.length > 1 ? parts[1] : parts[0];
   }
+
+  // 1. Primary Strategy: native image manipulator (handles file://, content://, and assets)
+  try {
+    const manip = await manipulateAsync(uri, [], {
+      base64: true,
+      format: SaveFormat.JPEG,
+    });
+    if (manip.base64) {
+      return manip.base64;
+    }
+  } catch (err) {
+    // Continue to next strategy if manipulator fails (e.g. non-image file)
+  }
+
+  // 2. Secondary Strategy: native FileSystem.readAsStringAsync
+  try {
+    const b64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    if (b64) return b64;
+  } catch (err) {
+    // Continue to next strategy
+  }
+
+  // 3. Web / Remote fallback: fetch blob + FileReader
   const res = await fetch(uri);
   const blob = await res.blob();
   return new Promise((resolve, reject) => {
@@ -319,46 +346,67 @@ export const predictVideoFromBackend = async (
   const fileName = options?.fileName || videoUri.split('/').pop() || 'leaf_video.mp4';
   const mimeType = options?.mimeType || 'video/mp4';
 
-  let res: Response | null = null;
+  let resData: BackendPredictionResponse | null = null;
   let lastError: any = null;
 
   for (const url of candidateUrls) {
     try {
-      const formData = new FormData();
-      if (Platform.OS === 'web' && options?.webFile) {
-        formData.append('file', options.webFile, fileName);
-      } else {
-        formData.append('file', {
-          uri: videoUri,
-          name: fileName.includes('.') ? fileName : `${fileName}.mp4`,
-          type: mimeType,
-        } as any);
-      }
-
-      if (options?.userId) {
-        formData.append('user_id', options.userId);
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
-      const response = await fetch(`${url}/api/v1/disease/predict-video`, {
-        method: 'POST',
-        body: formData,
-        headers: { Accept: 'application/json' },
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        res = response;
-        if (url !== baseUrl) {
-          await setBackendBaseUrl(url);
+      if (Platform.OS === 'web') {
+        const formData = new FormData();
+        if (options?.webFile) {
+          formData.append('file', options.webFile, fileName);
         }
-        break;
-      } else {
-        res = response;
-        if (response.status >= 400 && response.status < 500) {
+        if (options?.userId) {
+          formData.append('user_id', options.userId);
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
+        const response = await fetch(`${url}/api/v1/disease/predict-video`, {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          resData = await response.json();
+          if (url !== baseUrl) await setBackendBaseUrl(url);
           break;
+        } else {
+          const errorText = await response.text();
+          throw new Error(errorText || `Backend returned ${response.status}`);
+        }
+      } else {
+        // Native Android / iOS: Use FileSystem.uploadAsync
+        // Bypasses React Native's FormData which throws "Unsupported FormDataPart implementation"
+        const uploadResult = await FileSystem.uploadAsync(
+          `${url}/api/v1/disease/predict-video`,
+          videoUri,
+          {
+            httpMethod: 'POST',
+            uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+            fieldName: 'file',
+            mimeType: mimeType,
+            parameters: options?.userId ? { user_id: options.userId } : undefined,
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+        );
+
+        if (uploadResult.status >= 200 && uploadResult.status < 300) {
+          resData = JSON.parse(uploadResult.body);
+          if (url !== baseUrl) await setBackendBaseUrl(url);
+          break;
+        } else {
+          let errorMsg = `Upload failed with status ${uploadResult.status}`;
+          try {
+            const parsed = JSON.parse(uploadResult.body);
+            if (parsed.detail) errorMsg = parsed.detail;
+          } catch {}
+          throw new Error(errorMsg);
         }
       }
     } catch (err: any) {
@@ -366,22 +414,11 @@ export const predictVideoFromBackend = async (
     }
   }
 
-  if (!res || !res.ok) {
-    let message = lastError?.message || 'Video upload failed';
-    if (res && !res.ok) {
-      const errorBody = await res.text();
-      try {
-        const parsed = JSON.parse(errorBody);
-        if (parsed.detail) message = parsed.detail;
-      } catch {
-        message = `Backend returned status ${res.status}`;
-      }
-    }
-    throw new Error(message);
+  if (!resData) {
+    throw new Error(lastError?.message || 'Video analysis failed. Please verify server connection.');
   }
 
-  const data: BackendPredictionResponse = await res.json();
-  return mapBackendPredictionToDetection(data, options?.previewUri || videoUri);
+  return mapBackendPredictionToDetection(resData, options?.previewUri || videoUri);
 };
 
 /**
@@ -399,7 +436,7 @@ export const predictDiseaseFromBackend = async (
     try {
       b64Payload = await uriToBase64(imageUri);
     } catch (e) {
-      // If conversion fails, fall back to multipart
+      // conversion failed, will try uploadAsync
     }
   }
 
@@ -413,10 +450,10 @@ export const predictDiseaseFromBackend = async (
     ])
   ).filter(Boolean);
 
-  let res: Response | null = null;
+  let resData: BackendPredictionResponse | null = null;
   let lastError: any = null;
 
-  // 1. Primary Strategy: JSON Base64 (Immune to React Native Android multipart bugs)
+  // 1. Primary Strategy: JSON Base64 (Immune to all React Native FormData bugs)
   if (b64Payload) {
     for (const url of candidateUrls) {
       try {
@@ -440,8 +477,8 @@ export const predictDiseaseFromBackend = async (
         clearTimeout(timeoutId);
 
         if (response.ok) {
-          res = response;
-          await setBackendBaseUrl(url);
+          resData = await response.json();
+          if (url !== baseUrl) await setBackendBaseUrl(url);
           break;
         }
       } catch (err: any) {
@@ -450,39 +487,51 @@ export const predictDiseaseFromBackend = async (
     }
   }
 
-  // 2. Secondary Strategy: Multipart FormData
-  if (!res || !res.ok) {
-    const formData = new FormData();
+  // 2. Secondary Strategy: Native FileSystem Upload (Immune to New Architecture FormData bugs)
+  if (!resData) {
     const filename = imageUri.split('/').pop() || 'leaf_photo.jpg';
     const ext = filename.split('.').pop()?.toLowerCase();
     const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
 
-    formData.append('file', {
-      uri: imageUri,
-      name: filename.includes('.') ? filename : `${filename}.jpg`,
-      type: mimeType,
-    } as any);
-
-    if (userId) formData.append('user_id', userId);
-
     for (const url of candidateUrls) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-        const endpoint = `${url}/api/v1/disease/predict`;
+        if (Platform.OS === 'web') {
+          const formData = new FormData();
+          const blobRes = await fetch(imageUri);
+          const blob = await blobRes.blob();
+          formData.append('file', blob, filename);
+          if (userId) formData.append('user_id', userId);
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          body: formData,
-          headers: { Accept: 'application/json' },
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
+          const response = await fetch(`${url}/api/v1/disease/predict`, {
+            method: 'POST',
+            body: formData,
+            headers: { Accept: 'application/json' },
+          });
+          if (response.ok) {
+            resData = await response.json();
+            if (url !== baseUrl) await setBackendBaseUrl(url);
+            break;
+          }
+        } else {
+          // Native mobile: FileSystem.uploadAsync
+          const uploadResult = await FileSystem.uploadAsync(
+            `${url}/api/v1/disease/predict`,
+            imageUri,
+            {
+              httpMethod: 'POST',
+              uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+              fieldName: 'file',
+              mimeType: mimeType,
+              parameters: userId ? { user_id: userId } : undefined,
+              headers: { Accept: 'application/json' },
+            }
+          );
 
-        if (response.ok) {
-          res = response;
-          await setBackendBaseUrl(url);
-          break;
+          if (uploadResult.status >= 200 && uploadResult.status < 300) {
+            resData = JSON.parse(uploadResult.body);
+            if (url !== baseUrl) await setBackendBaseUrl(url);
+            break;
+          }
         }
       } catch (err: any) {
         lastError = err;
@@ -490,20 +539,11 @@ export const predictDiseaseFromBackend = async (
     }
   }
 
-  if (!res || !res.ok) {
-    let message = lastError?.message || 'Backend connection failed';
-    if (res && !res.ok) {
-      const errorBody = await res.text();
-      try {
-        const parsed = JSON.parse(errorBody);
-        if (parsed.detail) message = parsed.detail;
-      } catch (e) {
-        message = `Backend returned status ${res.status}`;
-      }
-    }
-    throw new Error(message);
+  if (!resData) {
+    throw new Error(
+      lastError?.message || 'Plant disease diagnosis failed. Please check backend connection.'
+    );
   }
 
-  const data: BackendPredictionResponse = await res.json();
-  return mapBackendPredictionToDetection(data, imageUri);
+  return mapBackendPredictionToDetection(resData, imageUri);
 };

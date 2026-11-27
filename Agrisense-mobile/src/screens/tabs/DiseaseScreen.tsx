@@ -13,12 +13,16 @@ import {
   Platform,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { colors } from '../../constants/colors';
 import { useDetection } from '../../context/DetectionContext';
 import { Header } from '../../components/common/Header';
 import { DiseaseResultModal } from '../disease/DiseaseResultModal';
 import { LiveCameraScannerModal } from '../../components/disease/LiveCameraScannerModal';
+import { VideoLeafPlayer } from '../../components/disease/VideoLeafPlayer';
+import { DiseaseDetection } from '../../types';
 import {
   sampleLeaves as defaultSampleLeaves,
   fetchSampleLeaves,
@@ -33,6 +37,7 @@ import {
   Camera,
   Image as ImageIcon,
   Video as VideoIcon,
+  FileUp,
   Scan,
   Sparkles,
   History,
@@ -43,6 +48,7 @@ import {
   RefreshCw,
   CheckCircle,
   X,
+  ArrowRight,
 } from 'lucide-react-native';
 
 interface DiseaseScreenProps {
@@ -73,6 +79,7 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
     durationMs?: number;
     webFile?: File;
   } | null>(null);
+  const [activeResult, setActiveResult] = useState<DiseaseDetection | null>(null);
   const [isCustomUpload, setIsCustomUpload] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [liveCameraVisible, setLiveCameraVisible] = useState(false);
@@ -93,7 +100,8 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
 
   const handleTestConnection = async (testUrl?: string) => {
     const rawUrl = testUrl || serverUrlInput;
-    const urlToTest = (rawUrl && rawUrl.trim().length > 0) ? rawUrl.trim() : 'http://10.0.2.2:8000';
+    const urlToTest =
+      rawUrl && rawUrl.trim().length > 0 ? rawUrl.trim() : 'http://10.0.2.2:8000';
     setServerUrlInput(urlToTest);
     setIsTestingConnection(true);
     try {
@@ -129,6 +137,15 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
     return true;
   };
 
+  const handleClearMedia = () => {
+    setSelectedImage(null);
+    setSelectedBase64(null);
+    setSelectedMediaType('image');
+    setSelectedVideoMeta(null);
+    setActiveResult(null);
+    setIsCustomUpload(false);
+  };
+
   const pickFromGallery = async () => {
     try {
       if (!(await ensureMediaLibraryPermission('photo'))) return;
@@ -141,6 +158,7 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
       });
 
       if (!res.canceled && res.assets && res.assets.length > 0) {
+        setActiveResult(null);
         setSelectedMediaType('image');
         setSelectedVideoMeta(null);
         setSelectedImage(res.assets[0].uri);
@@ -173,9 +191,10 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
           });
           previewUri = thumb.uri;
         } catch {
-          // Web or unsupported video container may skip thumbnail generation
+          // Thumbnail generation optional on some devices
         }
 
+        setActiveResult(null);
         setSelectedMediaType('video');
         setSelectedVideoMeta({
           uri: asset.uri,
@@ -194,13 +213,79 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
     }
   };
 
+  const pickFromFileSystem = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'video/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const asset = res.assets[0];
+        const mime = (asset.mimeType || '').toLowerCase();
+        const name = (asset.name || '').toLowerCase();
+        const isVideo =
+          mime.startsWith('video/') ||
+          /\.(mp4|mov|avi|mkv|webm|3gp|m4v)$/i.test(name);
+        const isImage =
+          mime.startsWith('image/') ||
+          /\.(jpg|jpeg|png|webp|bmp)$/i.test(name);
+
+        setActiveResult(null);
+
+        if (isVideo) {
+          setSelectedMediaType('video');
+          setSelectedVideoMeta({
+            uri: asset.uri,
+            mimeType: asset.mimeType || 'video/mp4',
+            fileName: asset.name || 'leaf_video.mp4',
+            webFile: asset.file,
+          });
+          setSelectedImage(null);
+          setSelectedBase64(null);
+          setIsCustomUpload(true);
+        } else if (isImage) {
+          let b64: string | null = null;
+          let imageUri = asset.uri;
+          try {
+            const manip = await manipulateAsync(asset.uri, [], {
+              base64: true,
+              format: SaveFormat.JPEG,
+            });
+            b64 = manip.base64 || null;
+            imageUri = manip.uri;
+          } catch (e) {
+            console.warn('Could not pre-convert to base64', e);
+          }
+
+          setSelectedMediaType('image');
+          setSelectedVideoMeta(null);
+          setSelectedImage(imageUri);
+          setSelectedBase64(b64);
+          setIsCustomUpload(true);
+        } else {
+          Alert.alert(
+            'Unsupported File Type',
+            'Please select an image (JPG, PNG, WEBP) or video (MP4, MOV, MKV) file.'
+          );
+        }
+      }
+    } catch (e) {
+      console.warn('Error picking file', e);
+      Alert.alert('Notice', 'Unable to pick file from device storage.');
+    }
+  };
+
   const openLiveCamera = () => {
     setLiveCameraVisible(true);
   };
 
   const handleAnalyze = async () => {
     if (!selectedImage && !selectedVideoMeta) {
-      Alert.alert('Select Media', 'Please open the camera or upload a leaf photo/video first.');
+      Alert.alert(
+        'Select Media',
+        'Please open the camera or upload a leaf photo, video, or file first.'
+      );
       return;
     }
 
@@ -229,18 +314,23 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
     }, 1200);
 
     try {
+      let result: DiseaseDetection;
       if (isVideo && selectedVideoMeta) {
-        await analyzeVideo(selectedVideoMeta.uri, {
+        result = await analyzeVideo(selectedVideoMeta.uri, {
           mimeType: selectedVideoMeta.mimeType,
           fileName: selectedVideoMeta.fileName,
           webFile: selectedVideoMeta.webFile,
           previewUri: selectedImage || selectedVideoMeta.uri,
         });
       } else if (selectedImage) {
-        await analyzeImage(selectedImage, selectedBase64);
+        result = await analyzeImage(selectedImage, selectedBase64);
+      } else {
+        throw new Error('No media selected for analysis.');
       }
+
       clearTimeout(timer1);
       clearTimeout(timer2);
+      setActiveResult(result);
       setModalVisible(true);
     } catch (e: any) {
       clearTimeout(timer1);
@@ -314,26 +404,22 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
           </View>
         </TouchableOpacity>
 
-        {/* Main Leaf Viewport / Camera Frame */}
+        {/* Main Leaf Viewport / Video Player / Camera Frame */}
         <View style={styles.scannerCard}>
           <View style={styles.imageFrame}>
-            {selectedImage || selectedVideoMeta ? (
-              <>
-                {selectedImage ? (
-                  <Image source={{ uri: selectedImage }} style={styles.previewImage} />
-                ) : (
-                  <View style={styles.placeholderBox}>
-                    <View style={styles.placeholderIconRing}>
-                      <VideoIcon size={38} color="#22C55E" />
-                    </View>
-                    <Text style={styles.placeholderTitle}>
-                      {selectedVideoMeta?.fileName || 'Leaf Video Selected'}
-                    </Text>
-                    <Text style={styles.placeholderText}>
-                      Tap "Diagnose Leaf Health" to sample frames and detect disease
-                    </Text>
-                  </View>
-                )}
+            {selectedMediaType === 'video' && selectedVideoMeta ? (
+              <VideoLeafPlayer
+                videoUri={selectedVideoMeta.uri}
+                fileName={selectedVideoMeta.fileName}
+                durationMs={selectedVideoMeta.durationMs}
+                detectionResult={activeResult}
+                isAnalyzing={isAnalyzing}
+                onClear={handleClearMedia}
+                onViewDetails={() => setModalVisible(true)}
+              />
+            ) : selectedImage ? (
+              <View style={styles.imageWrapper}>
+                <Image source={{ uri: selectedImage }} style={styles.previewImage} />
 
                 {/* Corner guide lines */}
                 <View style={[styles.cornerGuide, styles.topLeft]} />
@@ -345,11 +431,7 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
                 <View style={styles.aiBadgeOverlay}>
                   <Sparkles size={13} color="#FFFFFF" />
                   <Text style={styles.aiBadgeText}>
-                    {selectedMediaType === 'video'
-                      ? selectedVideoMeta?.durationMs
-                        ? `Uploaded Video (${Math.max(1, Math.round(selectedVideoMeta.durationMs / 1000))}s)`
-                        : 'Uploaded Leaf Video'
-                      : isCustomUpload
+                    {isCustomUpload
                       ? 'Uploaded Leaf Photo'
                       : isBackendOnline
                       ? 'Hugging Face MobileNetV2'
@@ -360,19 +442,59 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
                 {/* Clear / Remove media action */}
                 <TouchableOpacity
                   style={styles.clearImageBtn}
-                  onPress={() => {
-                    setSelectedImage(null);
-                    setSelectedBase64(null);
-                    setSelectedMediaType('image');
-                    setSelectedVideoMeta(null);
-                    setIsCustomUpload(false);
-                  }}
+                  onPress={handleClearMedia}
                   activeOpacity={0.8}
                 >
                   <X size={13} color="#FFFFFF" />
                   <Text style={styles.clearImageText}>Clear</Text>
                 </TouchableOpacity>
-              </>
+
+                {/* Disease HUD on image if analyzed */}
+                {activeResult && (
+                  <TouchableOpacity
+                    style={styles.imageHudCard}
+                    onPress={() => setModalVisible(true)}
+                    activeOpacity={0.9}
+                  >
+                    <View style={styles.imageHudHeader}>
+                      <View style={{ flex: 1, marginRight: 8 }}>
+                        <Text style={styles.imageHudCrop}>{activeResult.cropName}</Text>
+                        <Text style={styles.imageHudDisease} numberOfLines={1}>
+                          {activeResult.diseaseName}
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.imageHudBadge,
+                          {
+                            backgroundColor:
+                              activeResult.diseaseName.toLowerCase().includes('healthy')
+                                ? '#15803D'
+                                : '#B91C1C',
+                          },
+                        ]}
+                      >
+                        <Text style={styles.imageHudBadgeText}>
+                          {Math.round(
+                            activeResult.confidence > 1
+                              ? activeResult.confidence
+                              : activeResult.confidence * 100
+                          )}%
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.imageHudCtaRow}>
+                      <Text style={styles.imageHudSummary} numberOfLines={1}>
+                        {activeResult.description}
+                      </Text>
+                      <View style={styles.imageHudViewBtn}>
+                        <Text style={styles.imageHudViewText}>Cure</Text>
+                        <ArrowRight size={11} color="#FFFFFF" />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              </View>
             ) : (
               <View style={styles.placeholderBox}>
                 <View style={styles.placeholderIconRing}>
@@ -380,14 +502,14 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
                 </View>
                 <Text style={styles.placeholderTitle}>No Leaf Media Selected</Text>
                 <Text style={styles.placeholderText}>
-                  Open live camera or upload a leaf photo or video to diagnose
+                  Open live camera or upload a leaf photo, video, or file to diagnose
                 </Text>
               </View>
             )}
           </View>
 
-          {/* Camera / Photo / Video controls */}
-          <View style={styles.controlsRow}>
+          {/* Controls: Camera / Photo / Video / File */}
+          <View style={styles.controlsGrid}>
             <TouchableOpacity
               style={styles.controlBtn}
               onPress={openLiveCamera}
@@ -414,6 +536,15 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
               <VideoIcon size={20} color={colors.primary} />
               <Text style={styles.controlBtnText}>Upload Video</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.controlBtn}
+              onPress={pickFromFileSystem}
+              activeOpacity={0.8}
+            >
+              <FileUp size={20} color={colors.primary} />
+              <Text style={styles.controlBtnText}>Upload File</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Primary Analyze Action */}
@@ -430,18 +561,26 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
               </View>
             ) : (
               <View style={styles.analyzeContent}>
-                <Scan size={20} color="#FFFFFF" />
-                <Text style={styles.analyzeButtonText}>Diagnose Leaf Health</Text>
+                <Sparkles size={18} color="#FFFFFF" />
+                <Text style={styles.analyzeButtonText}>
+                  {selectedMediaType === 'video'
+                    ? 'Diagnose Leaf Video (Sample Frames)'
+                    : isBackendOnline
+                    ? 'Diagnose with MobileNetV2'
+                    : 'Diagnose Leaf Health'}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* Instant Sample Test Leaves */}
+        {/* Sample Leaves Picker (for easy testing without camera) */}
         <View style={styles.sampleSection}>
           <View style={styles.sampleTitleRow}>
-            <Text style={styles.sampleSectionTitle}>Quick Test Samples</Text>
-            <Text style={styles.sampleSub}>Tap any sample to test the AI model</Text>
+            <Text style={styles.sampleSectionTitle}>Or Test With Sample Leaves</Text>
+            <Text style={styles.sampleSub}>
+              Tap to test AI diagnostic accuracy instantly
+            </Text>
           </View>
 
           <ScrollView
@@ -463,6 +602,7 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
                     setSelectedVideoMeta(null);
                     setSelectedImage(leaf.uri);
                     setSelectedBase64(null);
+                    setActiveResult(null);
                     setIsCustomUpload(false);
                   }}
                   activeOpacity={0.8}
@@ -480,56 +620,58 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* Pathology Tips Box */}
+        {/* Photography / Scanning Guidelines */}
         <View style={styles.guidelineCard}>
           <View style={styles.guideTitleRow}>
-            <HelpCircle size={18} color="#0284C7" />
-            <Text style={styles.guideTitle}>Guidelines for High Accuracy</Text>
+            <HelpCircle size={16} color="#0284C7" />
+            <Text style={styles.guideTitle}>Optimal Diagnosis Tips</Text>
           </View>
-          <Text style={styles.guideBullet}>• Ensure bright, diffuse natural daylight (avoid dark shadows).</Text>
-          <Text style={styles.guideBullet}>• Focus closely on the leaf spot or symptomatic margin.</Text>
-          <Text style={styles.guideBullet}>• Hold camera flat against the leaf surface without blurring.</Text>
-          <Text style={styles.guideBullet}>• Backend running at: {backendStatus?.url || 'http://localhost:8000'}</Text>
+          <Text style={styles.guideBullet}>
+            • Focus directly on the single affected leaf with good natural lighting.
+          </Text>
+          <Text style={styles.guideBullet}>
+            • When recording or uploading leaf video, pan slowly across the leaf surface for 3-10 seconds.
+          </Text>
+          <Text style={styles.guideBullet}>
+            • Supported formats: JPG, PNG, WEBP, MP4, MOV, MKV, AVI, WEBM.
+          </Text>
         </View>
       </ScrollView>
 
-      {/* Live Camera Disease Scanner */}
+      {/* Live Camera Scanner Modal */}
       <LiveCameraScannerModal
         visible={liveCameraVisible}
         onClose={() => setLiveCameraVisible(false)}
+        onOpenConfig={() => setConfigModalVisible(true)}
         onSaveAndViewDetails={async (detection) => {
           await saveDetectionResult(detection);
           setSelectedMediaType('image');
           setSelectedVideoMeta(null);
           setSelectedImage(detection.imageUri);
           setSelectedBase64(null);
+          setActiveResult(detection);
           setIsCustomUpload(true);
           setLiveCameraVisible(false);
           setModalVisible(true);
         }}
-        onOpenConfig={() => setConfigModalVisible(true)}
       />
 
-      {/* Result Modal */}
+      {/* Disease Diagnosis & Cure Modal */}
       <DiseaseResultModal
         visible={modalVisible}
-        result={latestResult}
+        result={activeResult || latestResult}
         onClose={() => setModalVisible(false)}
         onScanAnother={() => {
           setModalVisible(false);
-          setSelectedImage(null);
-          setSelectedBase64(null);
-          setSelectedMediaType('image');
-          setSelectedVideoMeta(null);
-          setIsCustomUpload(false);
+          handleClearMedia();
         }}
       />
 
       {/* Backend Host Configuration Modal */}
       <Modal
         visible={configModalVisible}
+        transparent
         animationType="fade"
-        transparent={true}
         onRequestClose={() => setConfigModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
@@ -537,40 +679,40 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
             <View style={styles.configModalHeader}>
               <View style={styles.configModalTitleRow}>
                 <Server size={20} color={colors.primary} />
-                <Text style={styles.configModalTitle}>AI Backend Host</Text>
+                <Text style={styles.configModalTitle}>Backend Server Host</Text>
               </View>
               <TouchableOpacity
-                onPress={() => setConfigModalVisible(false)}
                 style={styles.configModalClose}
+                onPress={() => setConfigModalVisible(false)}
               >
                 <X size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             <Text style={styles.configModalSubtitle}>
-              Connect the app to your FastAPI MobileNetV2 backend.
+              Connect mobile app to the FastAPI MobileNetV2 backend.
             </Text>
 
             <View style={styles.statusBox}>
-              <Text style={styles.statusBoxLabel}>Current Status:</Text>
+              <Text style={styles.statusBoxLabel}>Current Active Target:</Text>
               <Text
                 style={[
                   styles.statusBoxValue,
-                  { color: isBackendOnline ? '#16A34A' : '#DC2626' },
+                  { color: isBackendOnline ? '#15803D' : '#DC2626' },
                 ]}
               >
-                {isBackendOnline
-                  ? `ONLINE (${backendStatus?.modelName} on ${backendStatus?.device?.toUpperCase()})`
-                  : 'OFFLINE'}
+                {backendStatus?.url || serverUrlInput} •{' '}
+                {isBackendOnline ? 'ONLINE' : 'UNREACHABLE'}
               </Text>
             </View>
 
-            <Text style={styles.inputLabel}>Backend Base URL:</Text>
+            <Text style={styles.inputLabel}>Server URL (Host & Port):</Text>
             <TextInput
               style={styles.urlInput}
               value={serverUrlInput}
               onChangeText={setServerUrlInput}
-              placeholder="e.g. http://10.0.2.2:8000"
+              placeholder="http://10.0.2.2:8000"
+              placeholderTextColor="#94A3B8"
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -640,7 +782,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   historyBtnText: {
     fontSize: 12,
@@ -713,6 +857,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  imageWrapper: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
   previewImage: {
     width: '100%',
     height: '100%',
@@ -761,6 +910,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.25)',
+    zIndex: 10,
   },
   clearImageText: {
     color: '#FFFFFF',
@@ -800,6 +950,7 @@ const styles = StyleSheet.create({
   aiBadgeOverlay: {
     position: 'absolute',
     top: 12,
+    left: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     flexDirection: 'row',
     alignItems: 'center',
@@ -807,32 +958,98 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
+    zIndex: 10,
   },
   aiBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
   },
-  controlsRow: {
+  imageHudCard: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    right: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(34, 197, 94, 0.6)',
+    zIndex: 10,
+  },
+  imageHudHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  imageHudCrop: {
+    color: '#4ADE80',
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  imageHudDisease: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  imageHudBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  imageHudBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  imageHudCtaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+  },
+  imageHudSummary: {
+    color: '#CBD5E1',
+    fontSize: 10,
+    flex: 1,
+  },
+  imageHudViewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  imageHudViewText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  controlsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginVertical: 14,
   },
   controlBtn: {
-    flex: 1,
-    flexDirection: 'column',
+    flexBasis: '48%',
+    flexGrow: 1,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1.5,
-    borderColor: '#BBF7D0',
-    borderRadius: 12,
-    paddingVertical: 11,
-    paddingHorizontal: 6,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   controlBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: colors.primary,
     textAlign: 'center',
