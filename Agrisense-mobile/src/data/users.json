@@ -1,0 +1,20 @@
+{
+  "demoFarmer": {
+    "id": "user_farmer_1",
+    "name": "Ramesh Patel",
+    "email": "ramesh.farmer@agrisense.com",
+    "phone": "+91 98765 43210",
+    "role": "farmer",
+    "location": "Nashik Valley Farms, Maharashtra",
+    "avatarUrl": "https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=250"
+  },
+  "demoBuyer": {
+    "id": "user_buyer_1",
+    "name": "Anita Sharma",
+    "email": "anita.buyer@agrisense.com",
+    "phone": "+91 98220 12345",
+    "role": "buyer",
+    "location": "Koregaon Park, Pune, Maharashtra",
+    "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=250"
+  }
+}

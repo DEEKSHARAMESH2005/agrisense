@@ -1,0 +1,196 @@
+{
+  "sampleDiseaseResults": {
+    "earlyBlight": {
+      "id": "diag_101",
+      "cropName": "Tomato (Solanum lycopersicum)",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 95.4,
+      "severity": "Moderate",
+      "description": "Early blight is a widespread fungal disease that attacks tomato and potato foliage, stems, and fruit, producing distinct target-shaped rings.",
+      "symptoms": [
+        "Concentric ring lesions (target spots) on mature lower leaves",
+        "Yellow chlorotic halos surrounding brown necroses",
+        "Stem cankers near ground level in severe cases",
+        "Premature leaf yellowing and defoliation progressing upward"
+      ],
+      "treatment": {
+        "organic": [
+          "Apply Cold-Pressed Neem Oil spray (5ml per liter of soft water) every 7 days",
+          "Spray Copper Soap (Copper Octanoate) at first sign of spots",
+          "Bio-fungicide drench with Bacillus subtilis or Trichoderma viride"
+        ],
+        "chemical": [
+          "Mancozeb 75% WP (2.5g / liter water)",
+          "Azoxystrobin 23% SC (1ml / liter) for targeted translaminar control",
+          "Chlorothalonil 75% WP (2g / liter) on alternate weeks"
+        ]
+      },
+      "prevention": [
+        "Maintain adequate 60cm row spacing to maximize airflow",
+        "Mulch heavily with clean straw to prevent soil splashback onto foliage",
+        "Strictly avoid overhead irrigation; use drip watering at soil base",
+        "Rotate solanaceous crops on a 3-year cycle"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "date": "14 Nov 2026, 12:45 PM",
+      "isDemo": true
+    },
+    "powderyMildew": {
+      "id": "diag_102",
+      "cropName": "Grapevine / Capsicum",
+      "diseaseName": "Powdery Mildew (Erysiphe necator)",
+      "confidence": 93.8,
+      "severity": "Mild",
+      "description": "A powdery white fungal coating covering leaves and shoots, reducing photosynthesis and fruit size.",
+      "symptoms": [
+        "White talcum powder-like fungal patches on leaf surfaces",
+        "Leaves crinkle, cup upwards, and show stunted growth",
+        "Premature leaf drop exposing fruit to sunburn"
+      ],
+      "treatment": {
+        "organic": [
+          "Spray diluted milk whey (1 part milk to 9 parts water) in morning sun",
+          "Potassium bicarbonate spray (3g / liter of water)",
+          "Neem seed kernel extract (NSKE 5%) foliar wash"
+        ],
+        "chemical": [
+          "Wettable Sulphur 80% WP (2g / liter)",
+          "Myclobutanil 10% WP (0.5g / liter)"
+        ]
+      },
+      "prevention": [
+        "Prune dense canopy to ensure sun penetration through foliage",
+        "Avoid high nitrogen over-fertilization which promotes succulent leaves",
+        "Plant powdery mildew-resistant certified rootstocks"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "12 Nov 2026, 10:20 AM",
+      "isDemo": true
+    },
+    "healthy": {
+      "id": "diag_103",
+      "cropName": "Bell Pepper (Capsicum annuum)",
+      "diseaseName": "Healthy Foliage — No Pathogen Detected",
+      "confidence": 98.7,
+      "severity": "Mild",
+      "description": "The leaf tissue displays uniform chlorophyll saturation, vibrant cell structure, and no visible fungal or viral damage.",
+      "symptoms": [
+        "Uniform rich green pigmentation",
+        "Sturdy vascular vein network without chlorosis",
+        "Intact leaf margins and unblemished cuticle"
+      ],
+      "treatment": {
+        "organic": [
+          "Continue balanced seaweed extract bio-stimulant foliar nutrition"
+        ],
+        "chemical": [
+          "No chemical intervention required"
+        ]
+      },
+      "prevention": [
+        "Maintain regular drip irrigation scheduling",
+        "Monitor weekly using sticky traps for preventive pest scouting"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "10 Nov 2026, 04:15 PM",
+      "isDemo": true
+    }
+  },
+  "initialDetectionHistory": [
+    {
+      "id": "diag_101",
+      "cropName": "Tomato (Solanum lycopersicum)",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 95.4,
+      "severity": "Moderate",
+      "description": "Early blight is a widespread fungal disease that attacks tomato and potato foliage, stems, and fruit, producing distinct target-shaped rings.",
+      "symptoms": [
+        "Concentric ring lesions (target spots) on mature lower leaves",
+        "Yellow chlorotic halos surrounding brown necroses",
+        "Stem cankers near ground level in severe cases",
+        "Premature leaf yellowing and defoliation progressing upward"
+      ],
+      "treatment": {
+        "organic": [
+          "Apply Cold-Pressed Neem Oil spray (5ml per liter of soft water) every 7 days",
+          "Spray Copper Soap (Copper Octanoate) at first sign of spots",
+          "Bio-fungicide drench with Bacillus subtilis or Trichoderma viride"
+        ],
+        "chemical": [
+          "Mancozeb 75% WP (2.5g / liter water)",
+          "Azoxystrobin 23% SC (1ml / liter) for targeted translaminar control",
+          "Chlorothalonil 75% WP (2g / liter) on alternate weeks"
+        ]
+      },
+      "prevention": [
+        "Maintain adequate 60cm row spacing to maximize airflow",
+        "Mulch heavily with clean straw to prevent soil splashback onto foliage",
+        "Strictly avoid overhead irrigation; use drip watering at soil base",
+        "Rotate solanaceous crops on a 3-year cycle"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "date": "14 Nov 2026, 12:45 PM",
+      "isDemo": true
+    },
+    {
+      "id": "diag_102",
+      "cropName": "Grapevine / Capsicum",
+      "diseaseName": "Powdery Mildew (Erysiphe necator)",
+      "confidence": 93.8,
+      "severity": "Mild",
+      "description": "A powdery white fungal coating covering leaves and shoots, reducing photosynthesis and fruit size.",
+      "symptoms": [
+        "White talcum powder-like fungal patches on leaf surfaces",
+        "Leaves crinkle, cup upwards, and show stunted growth",
+        "Premature leaf drop exposing fruit to sunburn"
+      ],
+      "treatment": {
+        "organic": [
+          "Spray diluted milk whey (1 part milk to 9 parts water) in morning sun",
+          "Potassium bicarbonate spray (3g / liter of water)",
+          "Neem seed kernel extract (NSKE 5%) foliar wash"
+        ],
+        "chemical": [
+          "Wettable Sulphur 80% WP (2g / liter)",
+          "Myclobutanil 10% WP (0.5g / liter)"
+        ]
+      },
+      "prevention": [
+        "Prune dense canopy to ensure sun penetration through foliage",
+        "Avoid high nitrogen over-fertilization which promotes succulent leaves",
+        "Plant powdery mildew-resistant certified rootstocks"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "12 Nov 2026, 10:20 AM",
+      "isDemo": true
+    },
+    {
+      "id": "diag_103",
+      "cropName": "Bell Pepper (Capsicum annuum)",
+      "diseaseName": "Healthy Foliage — No Pathogen Detected",
+      "confidence": 98.7,
+      "severity": "Mild",
+      "description": "The leaf tissue displays uniform chlorophyll saturation, vibrant cell structure, and no visible fungal or viral damage.",
+      "symptoms": [
+        "Uniform rich green pigmentation",
+        "Sturdy vascular vein network without chlorosis",
+        "Intact leaf margins and unblemished cuticle"
+      ],
+      "treatment": {
+        "organic": [
+          "Continue balanced seaweed extract bio-stimulant foliar nutrition"
+        ],
+        "chemical": [
+          "No chemical intervention required"
+        ]
+      },
+      "prevention": [
+        "Maintain regular drip irrigation scheduling",
+        "Monitor weekly using sticky traps for preventive pest scouting"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "10 Nov 2026, 04:15 PM",
+      "isDemo": true
+    }
+  ]
+}

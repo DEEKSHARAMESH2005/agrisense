@@ -1,0 +1,149 @@
+[
+  {
+    "id": "AGRI-ORD-8821",
+    "buyerName": "Anita Sharma",
+    "buyerPhone": "+91 98220 12345",
+    "items": [
+      {
+        "product": {
+          "id": "prod_1",
+          "title": "Fresh Organic Farm Tomatoes",
+          "category": "Vegetables",
+          "price": 36,
+          "unit": "kg",
+          "quantity": 450,
+          "availableDate": "2026-11-15",
+          "location": "Nashik, Maharashtra",
+          "farmerName": "Ramesh Patel",
+          "farmerPhone": "+91 98765 43210",
+          "imageUrl": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+          "description": "Vine-ripened, hand-picked pesticide-free red tomatoes. Perfect for salads, purees, and daily kitchen cooking.",
+          "rating": 4.8,
+          "isOrganic": true
+        },
+        "quantity": 15
+      },
+      {
+        "product": {
+          "id": "prod_4",
+          "title": "Crisp Green Bell Peppers (Capsicum)",
+          "category": "Vegetables",
+          "price": 48,
+          "unit": "kg",
+          "quantity": 320,
+          "availableDate": "2026-11-16",
+          "location": "Nashik, Maharashtra",
+          "farmerName": "Ramesh Patel",
+          "farmerPhone": "+91 98765 43210",
+          "imageUrl": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+          "description": "Fresh greenhouse grown green capsicum with thick crunchy flesh. Harvested fresh on order.",
+          "rating": 4.6,
+          "isOrganic": true
+        },
+        "quantity": 5
+      }
+    ],
+    "totalAmount": 780,
+    "status": "in_transit",
+    "orderDate": "2026-11-14 09:30 AM",
+    "deliveryAddress": "Flat 402, Green Meadows, Viman Nagar, Pune, MH - 411014",
+    "pickupAddress": "Farm Shed #3, Dindori Agro Cluster, Nashik, MH - 422202",
+    "pickupCoords": {
+      "latitude": 20.2012,
+      "longitude": 73.8341
+    },
+    "deliveryCoords": {
+      "latitude": 18.5679,
+      "longitude": 73.9143
+    },
+    "estimatedDelivery": "Today by 04:30 PM (Simulated)",
+    "deliveryRider": {
+      "name": "Vikas Shinde",
+      "phone": "+91 98900 66778",
+      "vehicle": "Bolero Maxi Truck (MH 15 AB 4421)"
+    },
+    "isDemo": true
+  },
+  {
+    "id": "AGRI-ORD-8794",
+    "buyerName": "Anita Sharma",
+    "buyerPhone": "+91 98220 12345",
+    "items": [
+      {
+        "product": {
+          "id": "prod_5",
+          "title": "Enriched Bio-Vermicompost 25kg Bag",
+          "category": "Fertilizers",
+          "price": 320,
+          "unit": "bag",
+          "quantity": 150,
+          "availableDate": "2026-11-14",
+          "location": "Pune, Maharashtra",
+          "farmerName": "Pravin Jadhav",
+          "farmerPhone": "+91 98221 78901",
+          "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600",
+          "description": "100% natural earthworm compost enriched with Trichoderma and neem cake for disease protection and vigorous root growth.",
+          "rating": 4.9,
+          "isOrganic": true
+        },
+        "quantity": 2
+      }
+    ],
+    "totalAmount": 640,
+    "status": "delivered",
+    "orderDate": "2026-11-11 02:15 PM",
+    "deliveryAddress": "Flat 402, Green Meadows, Viman Nagar, Pune, MH - 411014",
+    "pickupAddress": "Bio-Organic Unit 2, Baramati, Pune, MH - 413102",
+    "pickupCoords": {
+      "latitude": 18.1517,
+      "longitude": 74.5771
+    },
+    "deliveryCoords": {
+      "latitude": 18.5679,
+      "longitude": 73.9143
+    },
+    "estimatedDelivery": "Delivered on Nov 12",
+    "isDemo": true
+  },
+  {
+    "id": "AGRI-ORD-8902",
+    "buyerName": "Organic Kitchen Grocers",
+    "buyerPhone": "+91 98112 99887",
+    "items": [
+      {
+        "product": {
+          "id": "prod_1",
+          "title": "Fresh Organic Farm Tomatoes",
+          "category": "Vegetables",
+          "price": 36,
+          "unit": "kg",
+          "quantity": 450,
+          "availableDate": "2026-11-15",
+          "location": "Nashik, Maharashtra",
+          "farmerName": "Ramesh Patel",
+          "farmerPhone": "+91 98765 43210",
+          "imageUrl": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+          "description": "Vine-ripened, hand-picked pesticide-free red tomatoes. Perfect for salads, purees, and daily kitchen cooking.",
+          "rating": 4.8,
+          "isOrganic": true
+        },
+        "quantity": 50
+      }
+    ],
+    "totalAmount": 1800,
+    "status": "confirmed",
+    "orderDate": "2026-11-14 11:45 AM",
+    "deliveryAddress": "Shop 12, APMC Market Yard, Gultekdi, Pune, MH",
+    "pickupAddress": "Nashik Valley Farms, Maharashtra",
+    "pickupCoords": {
+      "latitude": 19.9975,
+      "longitude": 73.7898
+    },
+    "deliveryCoords": {
+      "latitude": 18.4988,
+      "longitude": 73.8647
+    },
+    "estimatedDelivery": "Tomorrow by 11:00 AM",
+    "isDemo": true
+  }
+]

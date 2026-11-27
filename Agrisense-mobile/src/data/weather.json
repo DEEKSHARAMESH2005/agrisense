@@ -1,0 +1,64 @@
+{
+  "location": "Nashik Agro-Climatic Zone, MH",
+  "temperature": 28,
+  "condition": "Partly Cloudy with Pleasant Breeze",
+  "conditionIcon": "cloud-sun",
+  "humidity": 64,
+  "windSpeed": 14,
+  "rainfallMm": 0.2,
+  "uvIndex": 6,
+  "lastUpdated": "13:15 PM Today",
+  "farmingAdvice": "Optimal moisture retention today. Recommended window for foliar organic spray between 4 PM and 6 PM.",
+  "isDemo": true,
+  "forecast": [
+    {
+      "day": "Today",
+      "tempMin": 19,
+      "tempMax": 29,
+      "condition": "Partly Cloudy",
+      "rainfallProb": 15
+    },
+    {
+      "day": "Sun",
+      "tempMin": 18,
+      "tempMax": 28,
+      "condition": "Scattered Sun",
+      "rainfallProb": 10
+    },
+    {
+      "day": "Mon",
+      "tempMin": 20,
+      "tempMax": 30,
+      "condition": "Clear Sky",
+      "rainfallProb": 5
+    },
+    {
+      "day": "Tue",
+      "tempMin": 21,
+      "tempMax": 31,
+      "condition": "Sunny & Warm",
+      "rainfallProb": 0
+    },
+    {
+      "day": "Wed",
+      "tempMin": 20,
+      "tempMax": 29,
+      "condition": "Light Showers",
+      "rainfallProb": 45
+    },
+    {
+      "day": "Thu",
+      "tempMin": 19,
+      "tempMax": 27,
+      "condition": "Overcast Cloud",
+      "rainfallProb": 60
+    },
+    {
+      "day": "Fri",
+      "tempMin": 18,
+      "tempMax": 28,
+      "condition": "Mild Rain",
+      "rainfallProb": 40
+    }
+  ]
+}

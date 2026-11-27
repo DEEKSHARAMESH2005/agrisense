@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "AgriSense – Smart Agriculture Platform",
+    "slug": "agrisense-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "primaryColor": "#1E5631",
+    "splash": {
+      "backgroundColor": "#1E5631",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.agrisense.mobile"
+    },
+    "android": {
+      "package": "com.agrisense.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#1E5631",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

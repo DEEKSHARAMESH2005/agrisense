@@ -1,0 +1,57 @@
+{
+  "moisturePercentage": 62.4,
+  "temperatureCelsius": 24.8,
+  "humidityPercentage": 68,
+  "ph": 6.7,
+  "npk": {
+    "nitrogen": 145,
+    "phosphorus": 52,
+    "potassium": 198
+  },
+  "sensorStatus": "Connected",
+  "deviceId": "ESP32-AGRI-IOT-04",
+  "lastUpdated": "Just now (13:20 PM)",
+  "isDemo": true,
+  "history": [
+    {
+      "time": "06:00",
+      "moisture": 68.5,
+      "temperature": 21
+    },
+    {
+      "time": "08:00",
+      "moisture": 66,
+      "temperature": 22.4
+    },
+    {
+      "time": "10:00",
+      "moisture": 64.2,
+      "temperature": 24.1
+    },
+    {
+      "time": "12:00",
+      "moisture": 60.5,
+      "temperature": 26.8
+    },
+    {
+      "time": "14:00",
+      "moisture": 58.2,
+      "temperature": 27.5
+    },
+    {
+      "time": "16:00",
+      "moisture": 61,
+      "temperature": 25.2
+    },
+    {
+      "time": "18:00",
+      "moisture": 63.8,
+      "temperature": 23.6
+    },
+    {
+      "time": "20:00",
+      "moisture": 64,
+      "temperature": 22.1
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+# Environment variables (keep .env.example tracked)
+.env
+.env.local
+.env*.local
+!.env.example
+
+# Python / FastAPI backend
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Databases & uploaded images
+*.db
+*.sqlite
+*.sqlite3
+agrisense.db
+uploads/
+
+# Hugging Face / ML caches
+.cache/
+hf_cache/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+junit.xml
+
+# Node / React Native / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+*.tsbuildinfo
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+Agrisense-mobile/ios/
+Agrisense-mobile/android/
+
+# IDE, OS & logs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+logs/

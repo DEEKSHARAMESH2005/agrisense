@@ -1,0 +1,645 @@
+{
+  "demoFarmer": {
+    "id": "user_farmer_1",
+    "name": "Ramesh Patel",
+    "email": "ramesh.farmer@agrisense.com",
+    "phone": "+91 98765 43210",
+    "role": "farmer",
+    "location": "Nashik Valley Farms, Maharashtra",
+    "avatarUrl": "https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=250"
+  },
+  "demoBuyer": {
+    "id": "user_buyer_1",
+    "name": "Anita Sharma",
+    "email": "anita.buyer@agrisense.com",
+    "phone": "+91 98220 12345",
+    "role": "buyer",
+    "location": "Koregaon Park, Pune, Maharashtra",
+    "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=250"
+  },
+  "initialProducts": [
+    {
+      "id": "prod_1",
+      "title": "Fresh Organic Farm Tomatoes",
+      "category": "Vegetables",
+      "price": 36,
+      "unit": "kg",
+      "quantity": 450,
+      "availableDate": "2026-11-15",
+      "location": "Nashik, Maharashtra",
+      "farmerName": "Ramesh Patel",
+      "farmerPhone": "+91 98765 43210",
+      "imageUrl": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "description": "Vine-ripened, hand-picked pesticide-free red tomatoes. Perfect for salads, purees, and daily kitchen cooking.",
+      "rating": 4.8,
+      "isOrganic": true
+    },
+    {
+      "id": "prod_2",
+      "title": "Premium Ratnagiri Alphonso Mangoes",
+      "category": "Fruits",
+      "price": 680,
+      "unit": "dozen",
+      "quantity": 80,
+      "availableDate": "2026-11-20",
+      "location": "Ratnagiri, Maharashtra",
+      "farmerName": "Sunil Gaikwad",
+      "farmerPhone": "+91 98230 45678",
+      "imageUrl": "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600",
+      "description": "Authentic GI-tagged Ratnagiri Hapus mangoes. Naturally ripened in dry grass without calcium carbide.",
+      "rating": 4.9,
+      "isOrganic": true
+    },
+    {
+      "id": "prod_3",
+      "title": "Traditional Basmati Rice (Paddy)",
+      "category": "Grains",
+      "price": 82,
+      "unit": "kg",
+      "quantity": 1200,
+      "availableDate": "2026-11-18",
+      "location": "Karnal, Haryana",
+      "farmerName": "Gurpreet Singh",
+      "farmerPhone": "+91 98140 11223",
+      "imageUrl": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600",
+      "description": "Extra-long grain aromatic basmati harvested this autumn. Rich aroma and non-sticky fluffy cooking.",
+      "rating": 4.7,
+      "isOrganic": false
+    },
+    {
+      "id": "prod_4",
+      "title": "Crisp Green Bell Peppers (Capsicum)",
+      "category": "Vegetables",
+      "price": 48,
+      "unit": "kg",
+      "quantity": 320,
+      "availableDate": "2026-11-16",
+      "location": "Nashik, Maharashtra",
+      "farmerName": "Ramesh Patel",
+      "farmerPhone": "+91 98765 43210",
+      "imageUrl": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "description": "Fresh greenhouse grown green capsicum with thick crunchy flesh. Harvested fresh on order.",
+      "rating": 4.6,
+      "isOrganic": true
+    },
+    {
+      "id": "prod_5",
+      "title": "Enriched Bio-Vermicompost 25kg Bag",
+      "category": "Fertilizers",
+      "price": 320,
+      "unit": "bag",
+      "quantity": 150,
+      "availableDate": "2026-11-14",
+      "location": "Pune, Maharashtra",
+      "farmerName": "Pravin Jadhav",
+      "farmerPhone": "+91 98221 78901",
+      "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600",
+      "description": "100% natural earthworm compost enriched with Trichoderma and neem cake for disease protection and vigorous root growth.",
+      "rating": 4.9,
+      "isOrganic": true
+    },
+    {
+      "id": "prod_6",
+      "title": "Certified High-Yield Mustard Seeds",
+      "category": "Seeds",
+      "price": 180,
+      "unit": "kg",
+      "quantity": 200,
+      "availableDate": "2026-11-22",
+      "location": "Jaipur, Rajasthan",
+      "farmerName": "Kailash Meena",
+      "farmerPhone": "+91 94140 55667",
+      "imageUrl": "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600",
+      "description": "Pusa Bold certified hybrid mustard seeds with 42% guaranteed oil recovery and aphid resistance.",
+      "rating": 4.5,
+      "isOrganic": false
+    },
+    {
+      "id": "prod_7",
+      "title": "Sweet Golden Honey Tangerines",
+      "category": "Fruits",
+      "price": 65,
+      "unit": "kg",
+      "quantity": 500,
+      "availableDate": "2026-11-17",
+      "location": "Nagpur, Maharashtra",
+      "farmerName": "Deepak Deshmukh",
+      "farmerPhone": "+91 97650 33445",
+      "imageUrl": "https://images.unsplash.com/photo-1547514701-42782101795e?w=600",
+      "description": "Juicy, seedless Nagpur oranges packed with vitamin C. Hand picked directly from family orchard.",
+      "rating": 4.8,
+      "isOrganic": true
+    }
+  ],
+  "initialOrders": [
+    {
+      "id": "AGRI-ORD-8821",
+      "buyerName": "Anita Sharma",
+      "buyerPhone": "+91 98220 12345",
+      "items": [
+        {
+          "product": {
+            "id": "prod_1",
+            "title": "Fresh Organic Farm Tomatoes",
+            "category": "Vegetables",
+            "price": 36,
+            "unit": "kg",
+            "quantity": 450,
+            "availableDate": "2026-11-15",
+            "location": "Nashik, Maharashtra",
+            "farmerName": "Ramesh Patel",
+            "farmerPhone": "+91 98765 43210",
+            "imageUrl": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+            "description": "Vine-ripened, hand-picked pesticide-free red tomatoes. Perfect for salads, purees, and daily kitchen cooking.",
+            "rating": 4.8,
+            "isOrganic": true
+          },
+          "quantity": 15
+        },
+        {
+          "product": {
+            "id": "prod_4",
+            "title": "Crisp Green Bell Peppers (Capsicum)",
+            "category": "Vegetables",
+            "price": 48,
+            "unit": "kg",
+            "quantity": 320,
+            "availableDate": "2026-11-16",
+            "location": "Nashik, Maharashtra",
+            "farmerName": "Ramesh Patel",
+            "farmerPhone": "+91 98765 43210",
+            "imageUrl": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+            "description": "Fresh greenhouse grown green capsicum with thick crunchy flesh. Harvested fresh on order.",
+            "rating": 4.6,
+            "isOrganic": true
+          },
+          "quantity": 5
+        }
+      ],
+      "totalAmount": 780,
+      "status": "in_transit",
+      "orderDate": "2026-11-14 09:30 AM",
+      "deliveryAddress": "Flat 402, Green Meadows, Viman Nagar, Pune, MH - 411014",
+      "pickupAddress": "Farm Shed #3, Dindori Agro Cluster, Nashik, MH - 422202",
+      "pickupCoords": {
+        "latitude": 20.2012,
+        "longitude": 73.8341
+      },
+      "deliveryCoords": {
+        "latitude": 18.5679,
+        "longitude": 73.9143
+      },
+      "estimatedDelivery": "Today by 04:30 PM (Simulated)",
+      "deliveryRider": {
+        "name": "Vikas Shinde",
+        "phone": "+91 98900 66778",
+        "vehicle": "Bolero Maxi Truck (MH 15 AB 4421)"
+      },
+      "isDemo": true
+    },
+    {
+      "id": "AGRI-ORD-8794",
+      "buyerName": "Anita Sharma",
+      "buyerPhone": "+91 98220 12345",
+      "items": [
+        {
+          "product": {
+            "id": "prod_5",
+            "title": "Enriched Bio-Vermicompost 25kg Bag",
+            "category": "Fertilizers",
+            "price": 320,
+            "unit": "bag",
+            "quantity": 150,
+            "availableDate": "2026-11-14",
+            "location": "Pune, Maharashtra",
+            "farmerName": "Pravin Jadhav",
+            "farmerPhone": "+91 98221 78901",
+            "imageUrl": "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600",
+            "description": "100% natural earthworm compost enriched with Trichoderma and neem cake for disease protection and vigorous root growth.",
+            "rating": 4.9,
+            "isOrganic": true
+          },
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 640,
+      "status": "delivered",
+      "orderDate": "2026-11-11 02:15 PM",
+      "deliveryAddress": "Flat 402, Green Meadows, Viman Nagar, Pune, MH - 411014",
+      "pickupAddress": "Bio-Organic Unit 2, Baramati, Pune, MH - 413102",
+      "pickupCoords": {
+        "latitude": 18.1517,
+        "longitude": 74.5771
+      },
+      "deliveryCoords": {
+        "latitude": 18.5679,
+        "longitude": 73.9143
+      },
+      "estimatedDelivery": "Delivered on Nov 12",
+      "isDemo": true
+    },
+    {
+      "id": "AGRI-ORD-8902",
+      "buyerName": "Organic Kitchen Grocers",
+      "buyerPhone": "+91 98112 99887",
+      "items": [
+        {
+          "product": {
+            "id": "prod_1",
+            "title": "Fresh Organic Farm Tomatoes",
+            "category": "Vegetables",
+            "price": 36,
+            "unit": "kg",
+            "quantity": 450,
+            "availableDate": "2026-11-15",
+            "location": "Nashik, Maharashtra",
+            "farmerName": "Ramesh Patel",
+            "farmerPhone": "+91 98765 43210",
+            "imageUrl": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+            "description": "Vine-ripened, hand-picked pesticide-free red tomatoes. Perfect for salads, purees, and daily kitchen cooking.",
+            "rating": 4.8,
+            "isOrganic": true
+          },
+          "quantity": 50
+        }
+      ],
+      "totalAmount": 1800,
+      "status": "confirmed",
+      "orderDate": "2026-11-14 11:45 AM",
+      "deliveryAddress": "Shop 12, APMC Market Yard, Gultekdi, Pune, MH",
+      "pickupAddress": "Nashik Valley Farms, Maharashtra",
+      "pickupCoords": {
+        "latitude": 19.9975,
+        "longitude": 73.7898
+      },
+      "deliveryCoords": {
+        "latitude": 18.4988,
+        "longitude": 73.8647
+      },
+      "estimatedDelivery": "Tomorrow by 11:00 AM",
+      "isDemo": true
+    }
+  ],
+  "demoSoilData": {
+    "moisturePercentage": 62.4,
+    "temperatureCelsius": 24.8,
+    "humidityPercentage": 68,
+    "ph": 6.7,
+    "npk": {
+      "nitrogen": 145,
+      "phosphorus": 52,
+      "potassium": 198
+    },
+    "sensorStatus": "Connected",
+    "deviceId": "ESP32-AGRI-IOT-04",
+    "lastUpdated": "Just now (13:20 PM)",
+    "isDemo": true,
+    "history": [
+      {
+        "time": "06:00",
+        "moisture": 68.5,
+        "temperature": 21
+      },
+      {
+        "time": "08:00",
+        "moisture": 66,
+        "temperature": 22.4
+      },
+      {
+        "time": "10:00",
+        "moisture": 64.2,
+        "temperature": 24.1
+      },
+      {
+        "time": "12:00",
+        "moisture": 60.5,
+        "temperature": 26.8
+      },
+      {
+        "time": "14:00",
+        "moisture": 58.2,
+        "temperature": 27.5
+      },
+      {
+        "time": "16:00",
+        "moisture": 61,
+        "temperature": 25.2
+      },
+      {
+        "time": "18:00",
+        "moisture": 63.8,
+        "temperature": 23.6
+      },
+      {
+        "time": "20:00",
+        "moisture": 64,
+        "temperature": 22.1
+      }
+    ]
+  },
+  "demoWeatherData": {
+    "location": "Nashik Agro-Climatic Zone, MH",
+    "temperature": 28,
+    "condition": "Partly Cloudy with Pleasant Breeze",
+    "conditionIcon": "cloud-sun",
+    "humidity": 64,
+    "windSpeed": 14,
+    "rainfallMm": 0.2,
+    "uvIndex": 6,
+    "lastUpdated": "13:15 PM Today",
+    "farmingAdvice": "Optimal moisture retention today. Recommended window for foliar organic spray between 4 PM and 6 PM.",
+    "isDemo": true,
+    "forecast": [
+      {
+        "day": "Today",
+        "tempMin": 19,
+        "tempMax": 29,
+        "condition": "Partly Cloudy",
+        "rainfallProb": 15
+      },
+      {
+        "day": "Sun",
+        "tempMin": 18,
+        "tempMax": 28,
+        "condition": "Scattered Sun",
+        "rainfallProb": 10
+      },
+      {
+        "day": "Mon",
+        "tempMin": 20,
+        "tempMax": 30,
+        "condition": "Clear Sky",
+        "rainfallProb": 5
+      },
+      {
+        "day": "Tue",
+        "tempMin": 21,
+        "tempMax": 31,
+        "condition": "Sunny & Warm",
+        "rainfallProb": 0
+      },
+      {
+        "day": "Wed",
+        "tempMin": 20,
+        "tempMax": 29,
+        "condition": "Light Showers",
+        "rainfallProb": 45
+      },
+      {
+        "day": "Thu",
+        "tempMin": 19,
+        "tempMax": 27,
+        "condition": "Overcast Cloud",
+        "rainfallProb": 60
+      },
+      {
+        "day": "Fri",
+        "tempMin": 18,
+        "tempMax": 28,
+        "condition": "Mild Rain",
+        "rainfallProb": 40
+      }
+    ]
+  },
+  "sampleDiseaseResults": {
+    "earlyBlight": {
+      "id": "diag_101",
+      "cropName": "Tomato (Solanum lycopersicum)",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 95.4,
+      "severity": "Moderate",
+      "description": "Early blight is a widespread fungal disease that attacks tomato and potato foliage, stems, and fruit, producing distinct target-shaped rings.",
+      "symptoms": [
+        "Concentric ring lesions (target spots) on mature lower leaves",
+        "Yellow chlorotic halos surrounding brown necroses",
+        "Stem cankers near ground level in severe cases",
+        "Premature leaf yellowing and defoliation progressing upward"
+      ],
+      "treatment": {
+        "organic": [
+          "Apply Cold-Pressed Neem Oil spray (5ml per liter of soft water) every 7 days",
+          "Spray Copper Soap (Copper Octanoate) at first sign of spots",
+          "Bio-fungicide drench with Bacillus subtilis or Trichoderma viride"
+        ],
+        "chemical": [
+          "Mancozeb 75% WP (2.5g / liter water)",
+          "Azoxystrobin 23% SC (1ml / liter) for targeted translaminar control",
+          "Chlorothalonil 75% WP (2g / liter) on alternate weeks"
+        ]
+      },
+      "prevention": [
+        "Maintain adequate 60cm row spacing to maximize airflow",
+        "Mulch heavily with clean straw to prevent soil splashback onto foliage",
+        "Strictly avoid overhead irrigation; use drip watering at soil base",
+        "Rotate solanaceous crops on a 3-year cycle"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "date": "14 Nov 2026, 12:45 PM",
+      "isDemo": true
+    },
+    "powderyMildew": {
+      "id": "diag_102",
+      "cropName": "Grapevine / Capsicum",
+      "diseaseName": "Powdery Mildew (Erysiphe necator)",
+      "confidence": 93.8,
+      "severity": "Mild",
+      "description": "A powdery white fungal coating covering leaves and shoots, reducing photosynthesis and fruit size.",
+      "symptoms": [
+        "White talcum powder-like fungal patches on leaf surfaces",
+        "Leaves crinkle, cup upwards, and show stunted growth",
+        "Premature leaf drop exposing fruit to sunburn"
+      ],
+      "treatment": {
+        "organic": [
+          "Spray diluted milk whey (1 part milk to 9 parts water) in morning sun",
+          "Potassium bicarbonate spray (3g / liter of water)",
+          "Neem seed kernel extract (NSKE 5%) foliar wash"
+        ],
+        "chemical": [
+          "Wettable Sulphur 80% WP (2g / liter)",
+          "Myclobutanil 10% WP (0.5g / liter)"
+        ]
+      },
+      "prevention": [
+        "Prune dense canopy to ensure sun penetration through foliage",
+        "Avoid high nitrogen over-fertilization which promotes succulent leaves",
+        "Plant powdery mildew-resistant certified rootstocks"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "12 Nov 2026, 10:20 AM",
+      "isDemo": true
+    },
+    "healthy": {
+      "id": "diag_103",
+      "cropName": "Bell Pepper (Capsicum annuum)",
+      "diseaseName": "Healthy Foliage — No Pathogen Detected",
+      "confidence": 98.7,
+      "severity": "Mild",
+      "description": "The leaf tissue displays uniform chlorophyll saturation, vibrant cell structure, and no visible fungal or viral damage.",
+      "symptoms": [
+        "Uniform rich green pigmentation",
+        "Sturdy vascular vein network without chlorosis",
+        "Intact leaf margins and unblemished cuticle"
+      ],
+      "treatment": {
+        "organic": [
+          "Continue balanced seaweed extract bio-stimulant foliar nutrition"
+        ],
+        "chemical": [
+          "No chemical intervention required"
+        ]
+      },
+      "prevention": [
+        "Maintain regular drip irrigation scheduling",
+        "Monitor weekly using sticky traps for preventive pest scouting"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "10 Nov 2026, 04:15 PM",
+      "isDemo": true
+    }
+  },
+  "initialDetectionHistory": [
+    {
+      "id": "diag_101",
+      "cropName": "Tomato (Solanum lycopersicum)",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 95.4,
+      "severity": "Moderate",
+      "description": "Early blight is a widespread fungal disease that attacks tomato and potato foliage, stems, and fruit, producing distinct target-shaped rings.",
+      "symptoms": [
+        "Concentric ring lesions (target spots) on mature lower leaves",
+        "Yellow chlorotic halos surrounding brown necroses",
+        "Stem cankers near ground level in severe cases",
+        "Premature leaf yellowing and defoliation progressing upward"
+      ],
+      "treatment": {
+        "organic": [
+          "Apply Cold-Pressed Neem Oil spray (5ml per liter of soft water) every 7 days",
+          "Spray Copper Soap (Copper Octanoate) at first sign of spots",
+          "Bio-fungicide drench with Bacillus subtilis or Trichoderma viride"
+        ],
+        "chemical": [
+          "Mancozeb 75% WP (2.5g / liter water)",
+          "Azoxystrobin 23% SC (1ml / liter) for targeted translaminar control",
+          "Chlorothalonil 75% WP (2g / liter) on alternate weeks"
+        ]
+      },
+      "prevention": [
+        "Maintain adequate 60cm row spacing to maximize airflow",
+        "Mulch heavily with clean straw to prevent soil splashback onto foliage",
+        "Strictly avoid overhead irrigation; use drip watering at soil base",
+        "Rotate solanaceous crops on a 3-year cycle"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "date": "14 Nov 2026, 12:45 PM",
+      "isDemo": true
+    },
+    {
+      "id": "diag_102",
+      "cropName": "Grapevine / Capsicum",
+      "diseaseName": "Powdery Mildew (Erysiphe necator)",
+      "confidence": 93.8,
+      "severity": "Mild",
+      "description": "A powdery white fungal coating covering leaves and shoots, reducing photosynthesis and fruit size.",
+      "symptoms": [
+        "White talcum powder-like fungal patches on leaf surfaces",
+        "Leaves crinkle, cup upwards, and show stunted growth",
+        "Premature leaf drop exposing fruit to sunburn"
+      ],
+      "treatment": {
+        "organic": [
+          "Spray diluted milk whey (1 part milk to 9 parts water) in morning sun",
+          "Potassium bicarbonate spray (3g / liter of water)",
+          "Neem seed kernel extract (NSKE 5%) foliar wash"
+        ],
+        "chemical": [
+          "Wettable Sulphur 80% WP (2g / liter)",
+          "Myclobutanil 10% WP (0.5g / liter)"
+        ]
+      },
+      "prevention": [
+        "Prune dense canopy to ensure sun penetration through foliage",
+        "Avoid high nitrogen over-fertilization which promotes succulent leaves",
+        "Plant powdery mildew-resistant certified rootstocks"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "12 Nov 2026, 10:20 AM",
+      "isDemo": true
+    },
+    {
+      "id": "diag_103",
+      "cropName": "Bell Pepper (Capsicum annuum)",
+      "diseaseName": "Healthy Foliage — No Pathogen Detected",
+      "confidence": 98.7,
+      "severity": "Mild",
+      "description": "The leaf tissue displays uniform chlorophyll saturation, vibrant cell structure, and no visible fungal or viral damage.",
+      "symptoms": [
+        "Uniform rich green pigmentation",
+        "Sturdy vascular vein network without chlorosis",
+        "Intact leaf margins and unblemished cuticle"
+      ],
+      "treatment": {
+        "organic": [
+          "Continue balanced seaweed extract bio-stimulant foliar nutrition"
+        ],
+        "chemical": [
+          "No chemical intervention required"
+        ]
+      },
+      "prevention": [
+        "Maintain regular drip irrigation scheduling",
+        "Monitor weekly using sticky traps for preventive pest scouting"
+      ],
+      "imageUri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "date": "10 Nov 2026, 04:15 PM",
+      "isDemo": true
+    }
+  ],
+  "farmingTips": [
+    {
+      "id": "tip_1",
+      "category": "Water Conservation",
+      "title": "Drip Irrigation Timing",
+      "text": "Irrigate during early morning (5:30 AM – 7:30 AM) to minimize evaporation losses and protect foliar health from scorch."
+    },
+    {
+      "id": "tip_2",
+      "category": "Natural Pest Control",
+      "title": "Neem Kernel Spray",
+      "text": "A 5% NSKE (Neem Seed Kernel Extract) solution acts as an effective oviposition deterrent against whiteflies and aphids."
+    },
+    {
+      "id": "tip_3",
+      "category": "Soil Vitality",
+      "title": "Mulching with Crop Residue",
+      "text": "Applying a 4-inch layer of straw or dried leaves lowers root-zone soil temperature by 3°C and suppresses weed germination."
+    }
+  ],
+  "sampleLeaves": [
+    {
+      "title": "Tomato Early Blight",
+      "crop": "Tomato",
+      "uri": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600",
+      "type": "earlyBlight"
+    },
+    {
+      "title": "Capsicum Powdery Mildew",
+      "crop": "Bell Pepper",
+      "uri": "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=600",
+      "type": "powderyMildew"
+    },
+    {
+      "title": "Healthy Green Foliage",
+      "crop": "Greenhouse Crop",
+      "uri": "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600",
+      "type": "healthy"
+    }
+  ],
+  "regionalZones": [
+    "Nashik Valley, MH",
+    "Pune Agro Zone, MH",
+    "Nagpur Citrus Belt, MH",
+    "Karnal Rice Plains, HR",
+    "Bengaluru Rural, KA"
+  ]
+}
