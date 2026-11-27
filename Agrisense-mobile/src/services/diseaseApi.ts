@@ -194,6 +194,103 @@ export const uriToBase64 = async (uri: string): Promise<string> => {
 };
 
 /**
+ * Map FastAPI prediction JSON to the app's DiseaseDetection shape
+ */
+const mapBackendPredictionToDetection = (
+  data: BackendPredictionResponse,
+  imageUri: string
+): DiseaseDetection => {
+  const pred = data.prediction;
+  const info = data.disease_information || {};
+
+  return {
+    id: `diag_${Date.now()}`,
+    cropName: pred.crop,
+    diseaseName: pred.disease,
+    confidence: pred.confidence,
+    severity: calculateSeverity(pred.disease, pred.confidence),
+    description:
+      info.description ||
+      `AI model diagnosis of ${pred.disease} on ${pred.crop} with ${pred.confidence}% confidence.`,
+    symptoms: info.symptoms || [],
+    treatment: {
+      organic: info.treatment?.organic || [],
+      chemical: info.treatment?.chemical || [],
+      cultural: info.treatment?.cultural || [],
+    },
+    prevention: info.prevention || [],
+    causes: info.causes || [],
+    imageUri: imageUri,
+    date: new Date(data.timestamp || Date.now()).toLocaleString('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }),
+    isDemo: false, // Live AI result from Hugging Face model!
+    isUncertain: data.is_uncertain,
+    uncertaintyWarning: data.uncertainty_warning || undefined,
+    alternatives: data.alternatives || [],
+    inferenceTimeMs: data.inference_time_ms,
+  };
+};
+
+/**
+ * Predict plant disease for a live camera video frame (skips DB history logging)
+ */
+export const predictLiveFrameFromBackend = async (
+  imageUri: string,
+  base64Data: string,
+  userId?: string
+): Promise<DiseaseDetection> => {
+  const baseUrl = await getBackendBaseUrl();
+  const candidateUrls = Array.from(
+    new Set([
+      baseUrl,
+      'http://10.0.2.2:8000',
+      'http://localhost:8000',
+      'http://127.0.0.1:8000',
+      LAN_HOST,
+    ])
+  ).filter(Boolean);
+
+  let lastError: any = null;
+
+  for (const url of candidateUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(`${url}/api/v1/disease/predict-base64`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          image_base64: base64Data,
+          filename: 'live_frame.jpg',
+          user_id: userId || null,
+          save_history: false,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        if (url !== baseUrl) {
+          await setBackendBaseUrl(url);
+        }
+        const data: BackendPredictionResponse = await response.json();
+        return mapBackendPredictionToDetection(data, imageUri);
+      }
+      lastError = new Error(`Backend returned status ${response.status}`);
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
+
+  throw new Error(lastError?.message || 'Could not reach AI backend for live detection.');
+};
+
+/**
  * Predict plant disease by sending leaf image to the FastAPI backend
  */
 export const predictDiseaseFromBackend = async (
@@ -314,35 +411,5 @@ export const predictDiseaseFromBackend = async (
   }
 
   const data: BackendPredictionResponse = await res.json();
-  const pred = data.prediction;
-  const info = data.disease_information || {};
-
-  return {
-    id: `diag_${Date.now()}`,
-    cropName: pred.crop,
-    diseaseName: pred.disease,
-    confidence: pred.confidence,
-    severity: calculateSeverity(pred.disease, pred.confidence),
-    description:
-      info.description ||
-      `AI model diagnosis of ${pred.disease} on ${pred.crop} with ${pred.confidence}% confidence.`,
-    symptoms: info.symptoms || [],
-    treatment: {
-      organic: info.treatment?.organic || [],
-      chemical: info.treatment?.chemical || [],
-      cultural: info.treatment?.cultural || [],
-    },
-    prevention: info.prevention || [],
-    causes: info.causes || [],
-    imageUri: imageUri,
-    date: new Date(data.timestamp || Date.now()).toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }),
-    isDemo: false, // Live AI result from Hugging Face model!
-    isUncertain: data.is_uncertain,
-    uncertaintyWarning: data.uncertainty_warning || undefined,
-    alternatives: data.alternatives || [],
-    inferenceTimeMs: data.inference_time_ms,
-  };
+  return mapBackendPredictionToDetection(data, imageUri);
 };

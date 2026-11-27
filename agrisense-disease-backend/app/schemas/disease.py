@@ -75,3 +75,4 @@ class DiseasePredictBase64Request(BaseModel):
     image_base64: str = Field(..., description="Base64 encoded plant leaf image string")
     filename: Optional[str] = Field("leaf_photo.jpg", description="Optional filename")
     user_id: Optional[str] = Field(None, description="Optional user ID for tracking detection history")
+    save_history: bool = Field(True, description="Whether to persist detection to history database")

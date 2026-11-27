@@ -165,6 +165,7 @@ async def predict_disease_base64(
             filename=request.filename or "leaf_photo.jpg",
             user_id=request.user_id,
             db=db,
+            save_history=request.save_history,
         )
         return response
 

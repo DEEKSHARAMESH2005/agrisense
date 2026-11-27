@@ -17,6 +17,7 @@ import { colors } from '../../constants/colors';
 import { useDetection } from '../../context/DetectionContext';
 import { Header } from '../../components/common/Header';
 import { DiseaseResultModal } from '../disease/DiseaseResultModal';
+import { LiveCameraScannerModal } from '../../components/disease/LiveCameraScannerModal';
 import {
   sampleLeaves as defaultSampleLeaves,
   fetchSampleLeaves,
@@ -49,6 +50,7 @@ interface DiseaseScreenProps {
 export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
   const {
     analyzeImage,
+    saveDetectionResult,
     isAnalyzing,
     latestResult,
     history,
@@ -62,6 +64,7 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
   const [selectedBase64, setSelectedBase64] = useState<string | null>(null);
   const [isCustomUpload, setIsCustomUpload] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [liveCameraVisible, setLiveCameraVisible] = useState(false);
   const [analyzingStep, setAnalyzingStep] = useState('Initializing AI analysis...');
 
   // Backend config modal state
@@ -132,32 +135,8 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
     }
   };
 
-  const captureCamera = async () => {
-    try {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert(
-          'Camera Permission',
-          'Camera access is needed to take a leaf photo.'
-        );
-        return;
-      }
-
-      const res = await ImagePicker.launchCameraAsync({
-        allowsEditing: false,
-        quality: 0.85,
-        base64: true,
-      });
-
-      if (!res.canceled && res.assets && res.assets.length > 0) {
-        setSelectedImage(res.assets[0].uri);
-        setSelectedBase64(res.assets[0].base64 || null);
-        setIsCustomUpload(true);
-      }
-    } catch (e) {
-      console.warn('Camera error', e);
-      Alert.alert('Notice', 'Unable to capture camera photo.');
-    }
+  const openLiveCamera = () => {
+    setLiveCameraVisible(true);
   };
 
   const handleAnalyze = async () => {
@@ -317,11 +296,11 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
           <View style={styles.controlsRow}>
             <TouchableOpacity
               style={styles.controlBtn}
-              onPress={captureCamera}
+              onPress={openLiveCamera}
               activeOpacity={0.8}
             >
               <Camera size={20} color={colors.primary} />
-              <Text style={styles.controlBtnText}>Take Photo</Text>
+              <Text style={styles.controlBtnText}>Open Camera</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -408,6 +387,21 @@ export const DiseaseScreen: React.FC<DiseaseScreenProps> = ({ navigation }) => {
           <Text style={styles.guideBullet}>• Backend running at: {backendStatus?.url || 'http://localhost:8000'}</Text>
         </View>
       </ScrollView>
+
+      {/* Live Camera Disease Scanner */}
+      <LiveCameraScannerModal
+        visible={liveCameraVisible}
+        onClose={() => setLiveCameraVisible(false)}
+        onSaveAndViewDetails={async (detection) => {
+          await saveDetectionResult(detection);
+          setSelectedImage(detection.imageUri);
+          setSelectedBase64(null);
+          setIsCustomUpload(true);
+          setLiveCameraVisible(false);
+          setModalVisible(true);
+        }}
+        onOpenConfig={() => setConfigModalVisible(true)}
+      />
 
       {/* Result Modal */}
       <DiseaseResultModal

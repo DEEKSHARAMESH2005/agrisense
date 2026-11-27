@@ -19,6 +19,7 @@ interface DetectionContextType {
   isBackendOnline: boolean;
   checkStatus: () => Promise<BackendStatus>;
   analyzeImage: (imageUri: string, base64Data?: string | null) => Promise<DiseaseDetection>;
+  saveDetectionResult: (result: DiseaseDetection) => Promise<void>;
   clearHistory: () => Promise<void>;
   setLatestResult: (result: DiseaseDetection | null) => void;
 }
@@ -71,6 +72,22 @@ export const DetectionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const recordDetection = async (result: DiseaseDetection) => {
+    setIsBackendOnline(true);
+    setLatestResult(result);
+    setHistory((prev) => {
+      const updated = [result, ...prev];
+      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated)).catch((e) =>
+        console.warn('Failed to save detection history', e)
+      );
+      return updated;
+    });
+  };
+
+  const saveDetectionResult = async (result: DiseaseDetection) => {
+    await recordDetection(result);
+  };
+
   const analyzeImage = async (
     imageUri: string,
     base64Data?: string | null
@@ -80,18 +97,8 @@ export const DetectionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       // 1. Attempt live classification using FastAPI MobileNetV2 backend
       const liveResult = await predictDiseaseFromBackend(imageUri, base64Data);
-      setIsBackendOnline(true);
-
-      const updated = [liveResult, ...history];
-      setHistory(updated);
-      setLatestResult(liveResult);
+      await recordDetection(liveResult);
       setIsAnalyzing(false);
-
-      try {
-        await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-      } catch (e) {
-        console.warn('Failed to save detection history', e);
-      }
 
       return liveResult;
     } catch (backendError: any) {
@@ -117,6 +124,7 @@ export const DetectionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         isBackendOnline,
         checkStatus: refreshStatus,
         analyzeImage,
+        saveDetectionResult,
         clearHistory,
         setLatestResult,
       }}

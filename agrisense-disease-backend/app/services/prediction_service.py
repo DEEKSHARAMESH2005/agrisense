@@ -28,6 +28,7 @@ class PredictionService:
         filename: str = "",
         user_id: Optional[str] = None,
         db: Optional[Session] = None,
+        save_history: bool = True,
     ) -> DiseasePredictResponse:
         """
         Execute full end-to-end plant disease prediction workflow.
@@ -81,7 +82,7 @@ class PredictionService:
         now_utc = datetime.now(timezone.utc)
         iso_timestamp = now_utc.isoformat()
 
-        if db is not None:
+        if db is not None and save_history:
             try:
                 alternatives_json = json.dumps([alt.model_dump() for alt in alternatives])
                 history_entry = DetectionHistory(

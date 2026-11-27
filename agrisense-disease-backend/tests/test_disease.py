@@ -117,3 +117,26 @@ def test_model_unavailable_returns_503(client, sample_leaf_image_bytes):
         )
         assert response.status_code == 503
         assert "unavailable" in response.json()["detail"].lower()
+
+
+def test_predict_base64_skip_history(client, sample_leaf_image_bytes):
+    """Test POST /api/v1/disease/predict-base64 with save_history=False skips DB logging."""
+    import base64
+
+    b64_str = base64.b64encode(sample_leaf_image_bytes).decode("utf-8")
+    response = client.post(
+        "/api/v1/disease/predict-base64",
+        json={
+            "image_base64": b64_str,
+            "filename": "live_frame.jpg",
+            "save_history": False,
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "prediction" in data
+
+    history_res = client.get("/api/v1/disease/history")
+    assert history_res.status_code == 200
+    assert history_res.json()["total"] == 0
