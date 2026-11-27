@@ -186,3 +186,54 @@ async def predict_disease_base64(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid base64 image data.",
         )
+
+
+@router.post(
+    "/disease/predict-video",
+    response_model=DiseasePredictResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Predict Plant Disease from Uploaded Leaf Video",
+)
+async def predict_disease_video(
+    file: UploadFile = File(..., description="Plant leaf video (MP4, MOV, AVI, WEBM, MKV, max 50MB)"),
+    user_id: Optional[str] = Form(None, description="Optional user ID for tracking detection history"),
+    save_history: bool = Form(True, description="Whether to persist detection to history database"),
+    db: Session = Depends(get_db),
+):
+    """
+    Accepts an uploaded leaf video, samples evenly spaced frames, classifies each
+    frame using MobileNetV2, and returns consensus diagnosis and treatment info.
+    """
+    if not model_service.is_loaded:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI Model is currently unavailable or still initializing. Please retry shortly.",
+        )
+
+    try:
+        file_bytes = await file.read()
+        return await prediction_service.predict_video(
+            file_bytes=file_bytes,
+            filename=file.filename or "leaf_video.mp4",
+            user_id=user_id,
+            db=db,
+            save_history=save_history,
+        )
+
+    except ImageValidationError as e:
+        logger.warning(f"Video validation failed: {e.message}")
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+
+    except ModelServiceError as e:
+        logger.error(f"Video inference error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Inference error occurred during video analysis: {str(e)}",
+        )
+
+    except Exception as e:
+        logger.error(f"Unexpected video prediction failure: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected internal error occurred while processing the leaf video.",
+        )

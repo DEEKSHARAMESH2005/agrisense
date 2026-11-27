@@ -7,6 +7,8 @@ import {
 } from '../constants/mockData';
 import {
   predictDiseaseFromBackend,
+  predictVideoFromBackend,
+  VideoUploadOptions,
   checkBackendStatus,
   BackendStatus,
 } from '../services/diseaseApi';
@@ -19,6 +21,7 @@ interface DetectionContextType {
   isBackendOnline: boolean;
   checkStatus: () => Promise<BackendStatus>;
   analyzeImage: (imageUri: string, base64Data?: string | null) => Promise<DiseaseDetection>;
+  analyzeVideo: (videoUri: string, options?: VideoUploadOptions) => Promise<DiseaseDetection>;
   saveDetectionResult: (result: DiseaseDetection) => Promise<void>;
   clearHistory: () => Promise<void>;
   setLatestResult: (result: DiseaseDetection | null) => void;
@@ -109,6 +112,26 @@ export const DetectionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const analyzeVideo = async (
+    videoUri: string,
+    options?: VideoUploadOptions
+  ): Promise<DiseaseDetection> => {
+    setIsAnalyzing(true);
+
+    try {
+      const liveResult = await predictVideoFromBackend(videoUri, options);
+      await recordDetection(liveResult);
+      setIsAnalyzing(false);
+
+      return liveResult;
+    } catch (backendError: any) {
+      setIsBackendOnline(false);
+      setIsAnalyzing(false);
+      console.warn('Backend video prediction failed:', backendError.message);
+      throw new Error(backendError.message || 'Could not analyze leaf video on backend.');
+    }
+  };
+
   const clearHistory = async () => {
     setHistory([]);
     await AsyncStorage.removeItem(HISTORY_KEY);
@@ -124,6 +147,7 @@ export const DetectionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         isBackendOnline,
         checkStatus: refreshStatus,
         analyzeImage,
+        analyzeVideo,
         saveDetectionResult,
         clearHistory,
         setLatestResult,

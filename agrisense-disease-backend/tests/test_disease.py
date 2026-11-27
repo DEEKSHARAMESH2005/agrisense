@@ -140,3 +140,47 @@ def test_predict_base64_skip_history(client, sample_leaf_image_bytes):
     history_res = client.get("/api/v1/disease/history")
     assert history_res.status_code == 200
     assert history_res.json()["total"] == 0
+
+
+def test_predict_valid_video(client, tmp_path):
+    """Test POST /api/v1/disease/predict-video with a valid synthetic leaf video."""
+    import cv2
+    import numpy as np
+
+    video_path = tmp_path / "leaf_sample.avi"
+    fourcc = cv2.VideoWriter_fourcc(*"MJPG")
+    writer = cv2.VideoWriter(str(video_path), fourcc, 10.0, (224, 224))
+    assert writer.isOpened()
+
+    frame = np.full((224, 224, 3), (34, 139, 34), dtype=np.uint8)
+    for _ in range(12):
+        writer.write(frame)
+    writer.release()
+
+    video_bytes = video_path.read_bytes()
+    response = client.post(
+        "/api/v1/disease/predict-video",
+        files={"file": ("leaf_sample.avi", video_bytes, "video/x-msvideo")},
+        data={"user_id": "test_video_farmer"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "prediction" in data
+    assert len(data["alternatives"]) == 3
+    assert data["inference_time_ms"] > 0
+
+
+def test_predict_video_empty_and_corrupted(client, empty_file_bytes, corrupted_file_bytes):
+    """Test POST /api/v1/disease/predict-video rejects empty or invalid video bytes."""
+    empty_res = client.post(
+        "/api/v1/disease/predict-video",
+        files={"file": ("empty.mp4", empty_file_bytes, "video/mp4")},
+    )
+    assert empty_res.status_code == 400
+
+    corrupt_res = client.post(
+        "/api/v1/disease/predict-video",
+        files={"file": ("corrupt.mp4", corrupted_file_bytes, "video/mp4")},
+    )
+    assert corrupt_res.status_code == 400

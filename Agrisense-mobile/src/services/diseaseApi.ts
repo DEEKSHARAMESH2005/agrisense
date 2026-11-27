@@ -290,6 +290,100 @@ export const predictLiveFrameFromBackend = async (
   throw new Error(lastError?.message || 'Could not reach AI backend for live detection.');
 };
 
+export interface VideoUploadOptions {
+  mimeType?: string;
+  fileName?: string;
+  webFile?: File;
+  previewUri?: string;
+  userId?: string;
+}
+
+/**
+ * Predict plant disease by uploading a recorded/gallery leaf video to FastAPI
+ */
+export const predictVideoFromBackend = async (
+  videoUri: string,
+  options?: VideoUploadOptions
+): Promise<DiseaseDetection> => {
+  const baseUrl = await getBackendBaseUrl();
+  const candidateUrls = Array.from(
+    new Set([
+      baseUrl,
+      'http://10.0.2.2:8000',
+      'http://localhost:8000',
+      'http://127.0.0.1:8000',
+      LAN_HOST,
+    ])
+  ).filter(Boolean);
+
+  const fileName = options?.fileName || videoUri.split('/').pop() || 'leaf_video.mp4';
+  const mimeType = options?.mimeType || 'video/mp4';
+
+  let res: Response | null = null;
+  let lastError: any = null;
+
+  for (const url of candidateUrls) {
+    try {
+      const formData = new FormData();
+      if (Platform.OS === 'web' && options?.webFile) {
+        formData.append('file', options.webFile, fileName);
+      } else {
+        formData.append('file', {
+          uri: videoUri,
+          name: fileName.includes('.') ? fileName : `${fileName}.mp4`,
+          type: mimeType,
+        } as any);
+      }
+
+      if (options?.userId) {
+        formData.append('user_id', options.userId);
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      const response = await fetch(`${url}/api/v1/disease/predict-video`, {
+        method: 'POST',
+        body: formData,
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        res = response;
+        if (url !== baseUrl) {
+          await setBackendBaseUrl(url);
+        }
+        break;
+      } else {
+        res = response;
+        if (response.status >= 400 && response.status < 500) {
+          break;
+        }
+      }
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
+
+  if (!res || !res.ok) {
+    let message = lastError?.message || 'Video upload failed';
+    if (res && !res.ok) {
+      const errorBody = await res.text();
+      try {
+        const parsed = JSON.parse(errorBody);
+        if (parsed.detail) message = parsed.detail;
+      } catch {
+        message = `Backend returned status ${res.status}`;
+      }
+    }
+    throw new Error(message);
+  }
+
+  const data: BackendPredictionResponse = await res.json();
+  return mapBackendPredictionToDetection(data, options?.previewUri || videoUri);
+};
+
 /**
  * Predict plant disease by sending leaf image to the FastAPI backend
  */

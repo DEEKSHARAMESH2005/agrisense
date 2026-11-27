@@ -26,8 +26,9 @@ class Settings:
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./agrisense.db")
 
-    # Image upload configuration
+    # Image & video upload configuration
     MAX_UPLOAD_SIZE_MB: int = int(os.getenv("MAX_UPLOAD_SIZE_MB", "10"))
+    MAX_VIDEO_UPLOAD_SIZE_MB: int = int(os.getenv("MAX_VIDEO_UPLOAD_SIZE_MB", "50"))
     SAVE_UPLOADED_IMAGES: bool = os.getenv("SAVE_UPLOADED_IMAGES", "False").lower() in ("true", "1", "yes")
     UPLOAD_DIR: Path = BASE_DIR / os.getenv("UPLOAD_DIR", "uploads")
 
@@ -43,6 +44,10 @@ class Settings:
     @property
     def max_upload_size_bytes(self) -> int:
         return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+
+    @property
+    def max_video_upload_size_bytes(self) -> int:
+        return self.MAX_VIDEO_UPLOAD_SIZE_MB * 1024 * 1024
 
     @property
     def cors_origins(self) -> List[str]:
